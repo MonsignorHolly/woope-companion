@@ -1,0 +1,131 @@
+:root {
+  color-scheme: dark;
+  --bg: #1e1f26;
+  --text: #f4f4f6;
+  --muted: #9a9ba6;
+  --accent: #5865f2;
+  --accent-hover: #4752c4;
+  --border: #34353f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  font-size: 14px;
+  user-select: none;
+}
+
+.drag-bar {
+  -webkit-app-region: drag;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  padding: 0 8px 0 14px;
+}
+
+.app-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.close-button {
+  -webkit-app-region: no-drag;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.card {
+  padding: 4px 28px 28px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 4px 0 10px;
+}
+
+.hint {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+
+#pairing-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-app-region: no-drag;
+}
+
+#code-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#code-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+#submit-button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#submit-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+#submit-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(237, 66, 69, 0.12);
+  border: 1px solid rgba(237, 66, 69, 0.4);
+  color: #ff9b9d;
+  font-size: 13px;
+  line-height: 1.4;
+}

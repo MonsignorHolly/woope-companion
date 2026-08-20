@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'" />
+<title>Woope Companion</title>
+<link rel="stylesheet" href="./pairing.css" />
+</head>
+<body>
+  <header class="drag-bar">
+    <span class="app-name">Woope Companion</span>
+    <button type="button" id="close-button" class="close-button" aria-label="Zavřít">×</button>
+  </header>
+
+  <main class="card">
+    <h1>Spárovat zařízení</h1>
+    <p class="hint">
+      Na webu otevři <strong>Nastavení&nbsp;→&nbsp;Discord Rich Presence</strong>, vygeneruj
+      párovací kód a zadej ho sem.
+    </p>
+
+    <form id="pairing-form">
+      <input
+        id="code-input"
+        name="code"
+        type="text"
+        inputmode="text"
+        autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+        maxlength="6"
+        placeholder="ABCD23"
+        aria-label="Párovací kód"
+      />
+      <button type="submit" id="submit-button">Spárovat</button>
+    </form>
+
+    <p id="error-message" class="error" hidden></p>
+  </main>
+
+  <script src="./pairing.js"></script>
+</body>
+</html>
