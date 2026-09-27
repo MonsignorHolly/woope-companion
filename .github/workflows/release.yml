@@ -1,0 +1,43 @@
+# Builds the Woope Companion installers for Windows, macOS and Linux and
+# publishes them to this repository's GitHub Releases, where the Woope
+# settings page links to ".../releases/latest/download/<file>" (fixed file
+# names from package.json -> build.*.artifactName).
+#
+# Release: bump "version" in package.json, then push a tag, e.g.
+#   git tag v0.2.0 && git push origin v0.2.0
+# or run the workflow by hand (Actions -> Release -> Run workflow).
+#
+# Uses only the built-in GITHUB_TOKEN - no secrets to set up. The Discord
+# application ID is not baked in: the app reads it from Woope at runtime
+# (GET /api/companion/config).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Build and publish installer
+        run: npx electron-builder --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No code-signing certificate yet: build unsigned instead of failing.
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'

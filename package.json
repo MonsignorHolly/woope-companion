@@ -1,6 +1,6 @@
 {
   "name": "woope-companion",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Tray-only desktop companion that mirrors Woope activity as Discord Rich Presence",
   "private": true,
   "main": "dist/main/index.js",
@@ -40,7 +40,8 @@
       "target": [
         "nsis"
       ],
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "artifactName": "Woope-Companion-Setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
@@ -54,14 +55,33 @@
         "dmg"
       ],
       "icon": "build/icon.png",
-      "category": "public.app-category.social-networking"
+      "category": "public.app-category.social-networking",
+      "artifactName": "Woope-Companion.${ext}"
     },
     "linux": {
       "target": [
         "AppImage"
       ],
       "icon": "build/icon.png",
-      "category": "Network"
-    }
+      "category": "Network",
+      "artifactName": "Woope-Companion.${ext}",
+      "mimeTypes": [
+        "x-scheme-handler/woope-companion"
+      ]
+    },
+    "protocols": [
+      {
+        "name": "Woope Companion",
+        "schemes": [
+          "woope-companion"
+        ]
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "release"
+      }
+    ]
   }
 }

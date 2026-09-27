@@ -1,5 +1,5 @@
 import { Client, type SetActivity } from "@xhayper/discord-rpc";
-import { ASSET_KEYS, DISCORD_CLIENT_ID, DISCORD_RECONNECT_INTERVAL_MS, WOOPE_WEBSITE_URL } from "./config";
+import { ASSET_KEYS, DISCORD_RECONNECT_INTERVAL_MS, WOOPE_WEBSITE_URL, resolveDiscordClientId } from "./config";
 import type { PresenceActivityType, PresenceResponse } from "./api-client";
 
 type SmallImageActivityType = keyof typeof ASSET_KEYS.smallImageByActivity;
@@ -67,32 +67,47 @@ function presenceSignature(presence: PresenceResponse): string {
  * what recovers when the user quits and relaunches Discord itself.
  */
 export class DiscordPresenceManager {
-  private readonly client: Client;
+  private client: Client | null = null;
   private ready = false;
   private reconnectTimer: NodeJS.Timeout | null = null;
   private lastSignature: string | null = null;
   private destroyed = false;
 
-  constructor(private readonly onConnectionChange: (connected: boolean) => void) {
-    this.client = new Client({ clientId: DISCORD_CLIENT_ID });
+  constructor(private readonly onConnectionChange: (connected: boolean) => void) {}
 
-    this.client.on("ready", () => {
+  /** The application ID comes from Woope (see config.ts), so the client is only created once that answered. */
+  private async ensureClient(): Promise<Client | null> {
+    if (this.client) return this.client;
+    const clientId = await resolveDiscordClientId();
+    if (!clientId) {
+      console.warn("[woope-companion] No Discord application ID yet (Woope did not provide one) - retrying later.");
+      return null;
+    }
+    const client = new Client({ clientId });
+    client.on("ready", () => {
       this.ready = true;
       this.lastSignature = null; // force a resend so a reconnect doesn't leave Discord blank
       this.onConnectionChange(true);
     });
-
-    this.client.on("disconnected", () => {
+    client.on("disconnected", () => {
       this.ready = false;
       this.onConnectionChange(false);
       this.scheduleReconnect();
     });
+    this.client = client;
+    return client;
   }
 
   connect(): void {
-    this.client.login().catch((error) => {
-      console.error("Discord RPC connection failed (is Discord running?):", error?.message ?? error);
-      this.scheduleReconnect();
+    void this.ensureClient().then((client) => {
+      if (!client) {
+        this.scheduleReconnect();
+        return;
+      }
+      client.login().catch((error) => {
+        console.error("Discord RPC connection failed (is Discord running?):", error?.message ?? error);
+        this.scheduleReconnect();
+      });
     });
   }
 
@@ -105,7 +120,7 @@ export class DiscordPresenceManager {
   }
 
   async applyPresence(presence: PresenceResponse): Promise<void> {
-    if (!this.ready || !this.client.user) return;
+    if (!this.ready || !this.client?.user) return;
 
     const signature = presenceSignature(presence);
     if (signature === this.lastSignature) return;
@@ -123,6 +138,6 @@ export class DiscordPresenceManager {
   destroy(): void {
     this.destroyed = true;
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
-    void this.client.destroy();
+    void this.client?.destroy();
   }
 }

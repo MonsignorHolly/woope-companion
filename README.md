@@ -44,22 +44,39 @@ WOOPE_API_BASE=http://localhost:3000 npm run dev
 
 (Na Windows PowerShell: `$env:WOOPE_API_BASE="http://localhost:3000"; npm run dev`)
 
-## Nastavení DISCORD_CLIENT_ID
+## Discord Application ID
 
-Appka potřebuje vlastní Discord aplikaci, aby mohla nastavovat Rich Presence:
+Appka ho **nemá zapečený** - při startu si ho stáhne z Woope
+(`GET /api/companion/config`, hodnota z proměnné `DISCORD_CLIENT_ID` na Vercelu). Nový
+instalátor proto není potřeba ani při jeho změně. Pro lokální vývoj ho jde přepsat:
 
-1. Jdi na [Discord Developer Portal](https://discord.com/developers/applications) a vytvoř
-   novou aplikaci (např. "Woope").
-2. Na stránce aplikace zkopíruj **Application ID**.
-3. Vlož ho do `src/main/config.ts` místo `TODO_DOPLNIT_Z_DISCORD_DEVELOPER_PORTALU`, nebo
-   appku spusť s env proměnnou:
+```bash
+DISCORD_CLIENT_ID=123456789012345678 npm run dev
+```
 
-   ```bash
-   DISCORD_CLIENT_ID=123456789012345678 npm run dev
-   ```
+## Párování jedním klikem
 
-Dokud `DISCORD_CLIENT_ID` zůstane na placeholderu, appka se o připojení k Discordu ani
-nepokouší (do konzole napíše varování) a tray zůstane na stavu "○ Nepřipojeno".
+Instalátor registruje odkaz `woope-companion://`. Na Woope v Nastavení → Discord
+Rich Presence stačí kliknout na **Propojit** a **Otevřít ve Woope Companion** - appka
+dostane kód `woope-companion://pair?code=123456` a spáruje se sama. Ruční zadání kódu
+zůstává jako záloha (ikona v liště → Zadat párovací kód).
+
+## Vydání nové verze
+
+Instalátory staví a zveřejňuje GitHub Actions (`.github/workflows/release.yml`) do
+GitHub Releases tohoto repozitáře - bez dalších tajných klíčů. Stačí zvýšit `version`
+v `package.json` a pushnout tag:
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+Soubory mají pevné názvy (`Woope-Companion-Setup.exe`, `Woope-Companion.dmg`,
+`Woope-Companion.AppImage`), takže odkazy na webu
+(`…/releases/latest/download/<soubor>`) vždy vedou na nejnovější verzi.
+
+Instalátory zatím nejsou podepsané: Windows při prvním spuštění ukáže SmartScreen
+(„Další informace → Přesto spustit“), macOS vyžaduje otevření přes pravé tlačítko → Otevřít.
 
 ### Rich Presence art assets
 

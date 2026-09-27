@@ -8,12 +8,30 @@ export const WOOPE_API_BASE = process.env.WOOPE_API_BASE?.trim() || "https://woo
 
 export const WOOPE_WEBSITE_URL = WOOPE_API_BASE;
 
-// TODO Holly: create an application at https://discord.com/developers/applications
-// and paste its "Application ID" here (or set DISCORD_CLIENT_ID in the environment).
-export const DISCORD_CLIENT_ID =
-  process.env.DISCORD_CLIENT_ID?.trim() || "TODO_DOPLNIT_Z_DISCORD_DEVELOPER_PORTALU";
+// The Discord application ID is served by Woope itself (GET
+// /api/companion/config, from the DISCORD_CLIENT_ID env var on Vercel), so a
+// released installer never has to be rebuilt to set or change it. The env
+// var here only overrides it for local development.
+export const DISCORD_CLIENT_ID_OVERRIDE = process.env.DISCORD_CLIENT_ID?.trim() || null;
 
-export const DISCORD_CLIENT_ID_CONFIGURED = DISCORD_CLIENT_ID !== "TODO_DOPLNIT_Z_DISCORD_DEVELOPER_PORTALU";
+const SNOWFLAKE = /^\d{17,20}$/;
+
+/** Resolves the Discord application ID: the dev override, else Woope's config endpoint. Null when neither has one. */
+export async function resolveDiscordClientId(): Promise<string | null> {
+  if (DISCORD_CLIENT_ID_OVERRIDE) return DISCORD_CLIENT_ID_OVERRIDE;
+  try {
+    const response = await fetch(`${WOOPE_API_BASE}/api/companion/config`);
+    if (!response.ok) return null;
+    const json = (await response.json()) as { discordClientId?: unknown };
+    return typeof json.discordClientId === "string" && SNOWFLAKE.test(json.discordClientId) ? json.discordClientId : null;
+  } catch (error) {
+    console.error("Failed to load the companion config:", error);
+    return null;
+  }
+}
+
+/** Custom URL scheme the installer registers: woope-companion://pair?code=123456 pairs in one click from the website. */
+export const PROTOCOL_SCHEME = "woope-companion";
 
 /** How often the companion polls GET /api/companion/presence. */
 export const POLL_INTERVAL_MS = 15_000;
